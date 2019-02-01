@@ -7,17 +7,22 @@ import (
 	coap "github.com/dustin/go-coap"
 )
 
-func request(serveraddress string, action string) {
+func main() {
+	server := flag.String("server", "localhost", "-server 192.168.7.2")
+	action := flag.String("action", "/ping", "action /ping")
+	flag.Parse()
+	request(*server, *action)
 
+}
+
+func sendGETRequest(serveraddress string, action string, messageID uint16, payload string) {
 	req := coap.Message{
 		Type:      coap.Confirmable,
 		Code:      coap.GET,
-		MessageID: 12345,
-		Payload:   []byte(""),
+		MessageID: messageID,
+		Payload:   []byte(payload),
 	}
-
 	path := action
-
 	req.SetOption(coap.ETag, "weetag")
 	req.SetOption(coap.MaxAge, 3)
 	req.SetPathString(path)
@@ -37,10 +42,8 @@ func request(serveraddress string, action string) {
 	}
 }
 
-func main() {
-	server := flag.String("server", "localhost", "-server 192.168.7.2")
-	action := flag.String("action", "/ping", "action /ping")
-	flag.Parse()
-	request(*server, *action)
-
+func request(serveraddress string, action string) {
+	if action == "/ping" {
+		sendGETRequest(serveraddress, action, 1234, "hello")
+	}
 }
