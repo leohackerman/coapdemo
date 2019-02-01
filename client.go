@@ -1,13 +1,13 @@
 package main
 
 import (
+	"flag"
 	"log"
-	"os"
 
 	coap "github.com/dustin/go-coap"
 )
 
-func main() {
+func request(serveraddress string, action string) {
 
 	req := coap.Message{
 		Type:      coap.Confirmable,
@@ -16,16 +16,13 @@ func main() {
 		Payload:   []byte(""),
 	}
 
-	path := "/pin"
-	if len(os.Args) > 1 {
-		path = os.Args[1]
-	}
+	path := action
 
 	req.SetOption(coap.ETag, "weetag")
 	req.SetOption(coap.MaxAge, 3)
 	req.SetPathString(path)
 
-	c, err := coap.Dial("udp", "localhost:5683")
+	c, err := coap.Dial("udp", serveraddress+":5683")
 	if err != nil {
 		log.Fatalf("Error dialing: %v", err)
 	}
@@ -38,5 +35,12 @@ func main() {
 	if rv != nil {
 		log.Printf("Response payload: %s", rv.Payload)
 	}
+}
+
+func main() {
+	server := flag.String("server", "localhost", "-server 192.168.7.2")
+	action := flag.String("action", "/ping", "action /ping")
+	flag.Parse()
+	request(*server, *action)
 
 }
